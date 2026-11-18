@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'task.dart';
+
 void main() {
   runApp(const TaskFlowApp());
 }
@@ -22,59 +24,58 @@ class TaskFlowApp extends StatelessWidget {
   }
 }
 
-class Task {
-  const Task({
-    required this.id,
-    required this.title,
-    required this.description,
-    required this.priority,
-    required this.isCompleted,
-  });
-
-  final int id;
-  final String title;
-  final String description;
-  final String priority;
-  final bool isCompleted;
-}
-
 const demoTasks = <Task>[
   Task(
     id: 1,
-    title: 'Leer documentación',
-    description: 'Revisar ListView.builder',
+    title: 'Preparar exposición',
+    description: 'Revisar las diapositivas y practicar',
     priority: 'Alta',
     isCompleted: false,
+    userId: 1,
   ),
   Task(
     id: 2,
-    title: 'Diseñar la pantalla',
-    description: 'Definir la tarjeta de tarea',
-    priority: 'Media',
+    title: 'Revisar apuntes de clase',
+    description: 'Organizar los temas vistos esta semana',
+    priority: 'Alta',
     isCompleted: false,
+    userId: 1,
   ),
   Task(
     id: 3,
-    title: 'Preparar evidencia',
-    description: 'Tomar captura del avance',
+    title: 'Revisar navegación de TaskFlow',
+    description: 'Comprobar que el detalle abra la tarea correcta',
     priority: 'Baja',
     isCompleted: true,
+    userId: 1,
   ),
   Task(
     id: 4,
-    title: 'Organizar el backlog',
-    description: 'Priorizar pendientes',
+    title: 'Organizar entregas de la semana',
+    description: 'Ordenar pendientes por fecha y prioridad',
     priority: 'Alta',
     isCompleted: false,
+    userId: 1,
   ),
   Task(
     id: 5,
-    title: 'Revisar código',
-    description: 'Ejecutar flutter analyze',
+    title: 'Avanzar proyecto académico',
+    description: 'Revisar requisitos y completar el siguiente avance',
     priority: 'Media',
     isCompleted: false,
+    userId: 1,
   ),
 ];
+
+Task? findTask(int id) {
+  for (final task in demoTasks) {
+    if (task.id == id) {
+      return task;
+    }
+  }
+
+  return null;
+}
 
 final appRouter = GoRouter(
   routes: [
@@ -135,100 +136,6 @@ class TaskListScreen extends StatelessWidget {
   }
 }
 
-class WelcomeScreen extends StatefulWidget {
-  const WelcomeScreen({super.key});
-
-  @override
-  State<WelcomeScreen> createState() => _WelcomeScreenState();
-}
-
-class _WelcomeScreenState extends State<WelcomeScreen> {
-  final String studentName = 'Marcelo Nieto';
-  int pendingTasks = 3;
-  static const int dailyGoal = 5;
-  int completedTasks = 0;
-
-  void _addTask() {
-    setState(() {
-      pendingTasks++;
-    });
-  }
-
-  void _completeTask() {
-    if (pendingTasks == 0) {
-      return;
-    }
-
-    setState(() {
-      pendingTasks--;
-
-      if (completedTasks < dailyGoal) {
-        completedTasks++;
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final statusMessage = pendingTasks == 0
-        ? '¡Excelente! No tienes tareas pendientes.'
-        : 'Aún tienes tareas por organizar.';
-
-    return Scaffold(
-      appBar: AppBar(title: const Text('TaskFlow'), centerTitle: true),
-      body: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Icon(Icons.check_circle_outline, size: 56),
-            const SizedBox(height: 24),
-            Text(
-              '¡Hola, $studentName!',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const SizedBox(height: 12),
-            const Text('Bienvenido/a a Desarrollo de aplicaciones móviles.'),
-            const SizedBox(height: 12),
-            Text(statusMessage),
-            const SizedBox(height: 12),
-            Text('Tareas completadas: $completedTasks / $dailyGoal'),
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Row(
-                  children: [
-                    const Icon(Icons.pending_actions),
-                    const SizedBox(width: 12),
-                    Text('Tareas pendientes: $pendingTasks'),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Wrap(
-              spacing: 12,
-              runSpacing: 12,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: _addTask,
-                  icon: const Icon(Icons.add),
-                  label: const Text('Agregar tarea'),
-                ),
-                OutlinedButton.icon(
-                  onPressed: pendingTasks == 0 ? null : _completeTask,
-                  icon: const Icon(Icons.done),
-                  label: const Text('Completar una tarea'),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class TaskDetailScreen extends StatelessWidget {
   const TaskDetailScreen({super.key, required this.taskId});
 
@@ -236,7 +143,14 @@ class TaskDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final task = demoTasks.firstWhere((item) => item.id == taskId);
+    final task = findTask(taskId);
+
+    if (task == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Detalle de tarea')),
+        body: const Center(child: Text('No se encontró esa tarea.')),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Detalle de tarea')),
@@ -252,6 +166,8 @@ class TaskDetailScreen extends StatelessWidget {
             Chip(label: Text('Prioridad: ${task.priority}')),
             const SizedBox(height: 12),
             Text(task.isCompleted ? 'Estado: completada' : 'Estado: pendiente'),
+            const SizedBox(height: 12),
+            Text('Usuario: ${task.userId}'),
             const Spacer(),
             FilledButton.tonalIcon(
               onPressed: () => context.pop(),
