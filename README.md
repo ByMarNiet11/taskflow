@@ -80,3 +80,12 @@ Estas son operaciones que TaskFlow podría necesitar más adelante; todavía no 
 - `POST /tasks` — crear una tarea.
 - `PATCH /tasks/:id` — actualizar una tarea.
 - `DELETE /tasks/:id` — eliminar una tarea.
+
+## API de tareas
+
+La aplicación consulta JSONPlaceholder en:
+https://jsonplaceholder.typicode.com/todos?userId=2
+
+El parámetro `userId` filtra las tareas del usuario 2. La API entrega los campos `userId`, `id`, `title` y `completed`. TaskFlow completa `description` y `priority` con valores de ejemplo porque la API no los proporciona.
+
+Al marcar una tarea como completada, el cambio se conserva solo en memoria y se pierde al recargar la aplicación. La API de práctica no guarda ese cambio.
