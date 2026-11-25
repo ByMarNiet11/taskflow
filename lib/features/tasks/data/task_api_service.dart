@@ -8,7 +8,7 @@ class TaskApiService {
     : _dio =
           dio ??
           Dio(BaseOptions(baseUrl: 'https://jsonplaceholder.typicode.com'));
-  static const int userId = 1;
+  static const int userId = 2;
 
   Future<List<Task>> getTasks() async {
     final response = await _dio.get<List<dynamic>>(
