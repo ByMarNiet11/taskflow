@@ -8,7 +8,10 @@ class TaskApiService {
     : _dio =
           dio ??
           Dio(BaseOptions(baseUrl: 'https://jsonplaceholder.typicode.com'));
+
   static const int userId = 2;
+
+  final Dio _dio;
 
   Future<List<Task>> getTasks() async {
     final response = await _dio.get<List<dynamic>>(
@@ -29,5 +32,28 @@ class TaskApiService {
     }).toList();
   }
 
-  final Dio _dio;
+  Future<Task> createTask(String title) async {
+    final response = await _dio.post<Map<String, dynamic>>(
+      '/todos',
+      data: {'title': title, 'completed': false, 'userId': userId},
+    );
+
+    final json = response.data;
+    if (json == null) {
+      throw const FormatException('Respuesta vacía.');
+    }
+
+    return Task.fromJson(json);
+  }
+
+  Future<void> updateTask(Task task) async {
+    await _dio.patch(
+      '/todos/${task.id}',
+      data: {'title': task.title, 'completed': task.isCompleted},
+    );
+  }
+
+  Future<void> deleteTask(int id) async {
+    await _dio.delete('/todos/$id');
+  }
 }
